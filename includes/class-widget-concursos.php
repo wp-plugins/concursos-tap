@@ -71,7 +71,7 @@ if(!class_exists('Epic_ConcursosTAP_Widget')){
          */
         public function widget( $args, $instance ) {
             $concursos_tap_concursos = get_option('concursos_tap_concursos');
-
+            $destination = wp_upload_dir();
             $width = $instance['width'];
             $height = $instance['height'];
 
@@ -81,19 +81,22 @@ if(!class_exists('Epic_ConcursosTAP_Widget')){
             <div id="concursoCarousel" class="carousel slide" data-interval="5000">
                 <!-- Carousel items -->
                 <div class="carousel-inner"><?php
-                $i = 0;
-                foreach($concursos_tap_concursos as $concurso):
-                    $active = $i > 0 ? "" : "active";
-                    $image = $this->image_resize($concurso['path'], $width, $height);
-                    if($image instanceof WP_Error)
-                        $image = $concurso['path'];?>
+                    $i = 0;
+                    foreach($concursos_tap_concursos as $concurso):
+                        $active = $i > 0 ? "" : "active";
+                        $image = $this->image_resize($concurso['path'], $width, $height, false, null, $destination['path']);
+                        if($image instanceof WP_Error){
+                            $image = $concurso['path'];
+                        }else{
+                            $image = $destination['url'].'/'.wp_basename($image);
+                        }?>
                     <div class="<?php echo $active ?> item">
                         <a href="<?php echo esc_url($concurso['url']) ?>" title="<?php echo $concurso['concursos'];  ?>" target="_blank" rel="bookmark">
-                            <img src="<?php echo $image;?>" alt="<?php echo $concurso['concursos']; ?>" title="<?php echo $concurso['concursos']; ?>" class="img-responsive" style="width: <?php echo $width?>; height: <?php echo $height?>;">
+                            <img src="<?php echo $image;?>" alt="<?php echo $concurso['concursos']; ?>" title="<?php echo $concurso['concursos']; ?>" class="img-responsive center-block" style="width: <?php echo $width?>; height: <?php echo $height?>;">
                         </a>
-                    </div><?php
-                    $i++;
-                endforeach; ?>
+                        </div><?php
+                        $i++;
+                    endforeach; ?>
                 </div>
                 <!-- Carousel nav -->
                 <a class="carousel-control left" href="#concursoCarousel" data-slide="prev">&lsaquo;</a>
