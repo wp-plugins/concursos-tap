@@ -76,10 +76,10 @@ class Concursos_TAP {
         /**
          * Define the default options
          *
-         * @since     1.0
+         * @since     2.0.0.1
          */
         $this->default_options = array(
-            'url_sync_link_concursos' => 'http://www.todoapuestas.org/tdapuestas/web/api/%s/concursos/listado.json?_=%s',
+            'url_sync_link_concursos' => 'http://www.todoapuestas.org/tdapuestas/web/api/%s/concursos/listado.json/?_=%s',
         );
 
         /**
