@@ -3,9 +3,9 @@
  * Plugin Name.
  *
  * @package   Concursos_TAP
- * @author    Alain Sanchez <asanchezg@inetzwerk.com>
+ * @author    Alain Sanchez <luka.ghost@gmail.com>
  * @license   GPL-2.0+
- * @link      http://www.inetzwerk.com
+ * @link      http://www.linkedin.com/in/mrbrazzi/
  * @copyright 2014 Alain Sanchez
  */
 
@@ -29,7 +29,7 @@ class Concursos_TAP {
 	 *
 	 * @var     string
 	 */
-	const VERSION = '1.0.0';
+	const VERSION = '2.1.0.0';
 
 	/**
 	 *
@@ -76,10 +76,10 @@ class Concursos_TAP {
         /**
          * Define the default options
          *
-         * @since     1.0
+         * @since     2.0.0.1
          */
         $this->default_options = array(
-            'url_sync_link_concursos' => 'http://www.todoapuestas.org/tdapuestas/web/api/%s/concursos/listado.json?_=%s',
+            'url_sync_link_concursos' => 'http://www.todoapuestas.org/tdapuestas/web/api/concursos/listado.json/?access_token=%s&_=%s',
         );
 
         /**
@@ -92,6 +92,7 @@ class Concursos_TAP {
          *
          * add_filter ( 'hook_name', 'your_filter', [priority], [accepted_args] );
          */
+        add_action( 'concursos_tap_remote_sync', array( $this, 'remote_sync' ) );
         add_action( 'sync_weekly_event', array( $this, 'remote_sync' ) );
         add_action( 'wp' , array( $this, 'active_remote_sync'));
         add_filter( 'cron_schedules', array($this, 'intervals'), 10, 1);
@@ -265,6 +266,7 @@ class Concursos_TAP {
 
 		delete_option('concursos_tap_remote_info');
 		delete_option('concursos_tap_concursos');
+        remove_action('concursos_tap_remote_sync', array( self::get_instance(), 'remote_sync' ));
 	}
 
 	/**
@@ -315,20 +317,35 @@ class Concursos_TAP {
      * Execute synchronizations from todoapuestas.org server
      *
      * @since   1.0
-     * @return array|void
+	 * @updated 2.1.0.0
+     * @return void
+	 * @throws Exception
      */
     public function remote_sync() {
         $option = get_option('concursos_tap_remote_info', $this->default_options);
-	    $apiKey = get_option('TAP_API_KEY');
+		$oauthUrl = get_option('TAP_OAUTH_CLIENT_CREDENTIALS_URL');
+		$publicId = get_option('TAP_PUBLIC_ID');
+        $secretKey = get_option('TAP_SECRET_KEY');
+		if(empty($publicId) || empty($secretKey)){
+			return null;
+		}
+
+		$oauthUrl = sprintf($oauthUrl, $publicId, $secretKey);
+		$oauthResponse = wp_remote_get($oauthUrl);
+		$oauthResponseBody = json_decode($oauthResponse['body']);
+		$oauthAccessToken = null;
+        if(!is_object($oauthResponseBody)){
+            throw new Exception('Invalid OAuth response');
+        }
+        $oauthAccessToken = $oauthResponseBody->access_token;
+
 	    $timestamp = new DateTime("now");
-
-	    if(empty($apiKey)){
-		    return;
-	    }
-
-	    $url_sync_link_concursos = esc_url(sprintf($option['url_sync_link_concursos'], $apiKey, $timestamp->getTimestamp()));
-	    $concursos = trim(@file_get_contents($url_sync_link_concursos));
-        $list_concursos = json_decode($concursos, true);
+        $apiUrl = esc_url(sprintf($option['url_sync_link_concursos'], $oauthAccessToken, $timestamp->getTimestamp()));
+        $apiResponse = wp_remote_get($apiUrl);
+        $list_concursos = json_decode($apiResponse['body'], true);
+        if(empty($list_concursos) || !isset($list_concursos['concursos'])){
+            throw new Exception('Invalid API response');
+        }
 
         if(!empty($list_concursos['concursos'])){
             update_option('concursos_tap_concursos', $list_concursos['concursos']);
