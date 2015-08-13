@@ -6,18 +6,18 @@
  * also follow WordPress Coding Standards and PHP best practices.
  *
  * @package   Concursos_TAP
- * @author    Alain Sanchez <asanchezg@inetzwerk.com>
+ * @author    Alain Sanchez <luka.ghost@gmail.com>
  * @license   GPL-2.0+
- * @link      http://www.inetzwerk.com
+ * @link      http://www.linkedin.com/in/mrbrazzi/
  * @copyright 2014 Alain Sanchez
  *
  * @wordpress-plugin
  * Plugin Name:       Concursos TAP
  * Plugin URI:       http://www.todoapuestas.org
  * Description:       View published competitions
- * Version:           2.0.0.2
- * Author:       Alain Sanchez
- * Author URI:       http://www.inetzwerk.com
+ * Version:           2.1.0.0
+ * Author:       	 Alain Sanchez
+ * Author URI:       http://www.linkedin.com/in/mrbrazzi/
  * Text Domain:       concursos-tap
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
