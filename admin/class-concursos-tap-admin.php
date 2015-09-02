@@ -18,7 +18,7 @@
  *
  *
  * @package Concursos_TAP_Admin
- * @author  Your Name <email@example.com>
+ * @author  Alain Sanchez <luka.ghost@gmail.com>
  */
 class Concursos_TAP_Admin {
 

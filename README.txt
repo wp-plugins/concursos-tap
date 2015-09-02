@@ -4,7 +4,7 @@ Donate link: http://todoapuestas.org/
 Tags: concursos, apuestas
 Requires at least: 3.5.1
 Tested up to: 4.2.2
-Stable tag: 2.1.0.0
+Stable tag: 2.1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,9 @@ Nothing for now
 
 
 == Changelog ==
+
+= 2.1.1.0 =
+* Added some improvements
 
 = 2.1.0.0 =
 * Added support for TAP Api REST's services through OAuth authentication/authorization

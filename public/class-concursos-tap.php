@@ -18,7 +18,7 @@
  *
  *
  * @package Concursos_TAP
- * @author  Your Name <email@example.com>
+ * @author  Alain Sanchez <luka.ghost@gmail.com>
  */
 class Concursos_TAP {
 
@@ -29,7 +29,7 @@ class Concursos_TAP {
 	 *
 	 * @var     string
 	 */
-	const VERSION = '2.1.0.0';
+	const VERSION = '2.1.1.0';
 
 	/**
 	 *
@@ -323,21 +323,8 @@ class Concursos_TAP {
      */
     public function remote_sync() {
         $option = get_option('concursos_tap_remote_info', $this->default_options);
-		$oauthUrl = get_option('TAP_OAUTH_CLIENT_CREDENTIALS_URL');
-		$publicId = get_option('TAP_PUBLIC_ID');
-        $secretKey = get_option('TAP_SECRET_KEY');
-		if(empty($publicId) || empty($secretKey)){
-			return null;
-		}
 
-		$oauthUrl = sprintf($oauthUrl, $publicId, $secretKey);
-		$oauthResponse = wp_remote_get($oauthUrl);
-		$oauthResponseBody = json_decode($oauthResponse['body']);
-		$oauthAccessToken = null;
-        if(!is_object($oauthResponseBody)){
-            throw new Exception('Invalid OAuth response');
-        }
-        $oauthAccessToken = $oauthResponseBody->access_token;
+        $oauthAccessToken = $this->get_oauth_access_token();
 
 	    $timestamp = new DateTime("now");
         $apiUrl = esc_url(sprintf($option['url_sync_link_concursos'], $oauthAccessToken, $timestamp->getTimestamp()));
@@ -360,4 +347,52 @@ class Concursos_TAP {
         );
         return $schedules;
     }
+
+	/**
+     * @since 2.1.1.0
+	 * @return string
+	 * @throws \Exception
+	 */
+	private function get_oauth_access_token()
+	{
+        session_start();
+		if(isset($_SESSION['TAP_OAUTH_CLIENT'])){
+			$now = new DateTime('now');
+			if($now->getTimestamp() <= intval($_SESSION['TAP_OAUTH_CLIENT']['expires_in'])){
+				$oauthAccessToken = $_SESSION['TAP_OAUTH_CLIENT']['access_token'];
+				return $oauthAccessToken;
+			}
+			unset($_SESSION['TAP_OAUTH_CLIENT']);
+		}
+
+		$oauthUrl = get_option('TAP_OAUTH_CLIENT_CREDENTIALS_URL');
+		$publicId = get_option('TAP_PUBLIC_ID');
+		$secretKey = get_option('TAP_SECRET_KEY');
+		if(empty($publicId) || empty($secretKey)){
+			throw new Exception('No public or secret key given');
+		}
+
+		$oauthUrl = sprintf($oauthUrl, $publicId, $secretKey);
+		$oauthResponse = wp_remote_get($oauthUrl);
+		if($oauthResponse instanceof WP_Error || strcmp($oauthResponse['response']['code'], '200') !== 0){
+			throw new \Exception('Invalid OAuth response');
+		}
+
+		$oauthResponseBody = json_decode($oauthResponse['body']);
+		$oauthAccessToken = null;
+		if($oauthResponseBody instanceof WP_Error || !is_object($oauthResponseBody)){
+			throw new \Exception('Invalid OAuth access token');
+		}
+		$oauthAccessToken = $oauthResponseBody->access_token;
+
+		if(!isset($_SESSION['TAP_OAUTH_CLIENT'])){
+			$now = new DateTime('now');
+			$_SESSION['TAP_OAUTH_CLIENT'] = array(
+				'access_token' => $oauthAccessToken,
+				'expires_in' => $now->getTimestamp() + intval($oauthResponseBody->expires_in)
+			);
+		}
+
+		return $oauthAccessToken;
+	}
 }

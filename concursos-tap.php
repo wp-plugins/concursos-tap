@@ -15,7 +15,7 @@
  * Plugin Name:       Concursos TAP
  * Plugin URI:       http://www.todoapuestas.org
  * Description:       View published competitions
- * Version:           2.1.0.0
+ * Version:           2.1.1.0
  * Author:       	 Alain Sanchez
  * Author URI:       http://www.linkedin.com/in/mrbrazzi/
  * Text Domain:       concursos-tap
