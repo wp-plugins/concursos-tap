@@ -44,8 +44,8 @@ if(!class_exists('Epic_ConcursosTAP_Widget')){
         public function form( $instance )
         {
             $title = isset($instance['title']) ? $instance['title'] : __('Concursos',$this->plugin_slug);
-            $width = isset($instance['width']) ? $instance['width'] : 258;
-            $height = isset($instance['height']) ? $instance['height'] : 430;
+            $width = isset($instance['width']) ? $instance['width'] : 300;
+            $height = isset($instance['height']) ? $instance['height'] : 500;
             ?>
             <p>
                 <label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Titulo de la columna', $this->plugin_slug ); ?>:</label>
@@ -71,33 +71,44 @@ if(!class_exists('Epic_ConcursosTAP_Widget')){
          */
         public function widget( $args, $instance ) {
             $concursos_tap_concursos = get_option('concursos_tap_concursos');
-
+            $destination = wp_upload_dir();
             $width = $instance['width'];
             $height = $instance['height'];
 
-            if(array_key_exists('before_widget', $args)) echo $args['before_widget']; ?>
-            <h2><?php echo $instance['title']; ?></h2><?php
+            if(array_key_exists('before_widget', $args)) echo $args['before_widget'];
+            if(array_key_exists('before_title', $args)) echo $args['before_title'];
+            echo $instance['title'];
+            if(array_key_exists('after_title', $args)) echo $args['after_title'];
             if(!empty($concursos_tap_concursos)): ?>
             <div id="concursoCarousel" class="carousel slide" data-interval="5000">
+                <?php $slide_count = count($concursos_tap_concursos) ?>
+                <ol class="carousel-indicators">
+                    <?php for($i = 0; $i < $slide_count; $i++ ):?>
+                        <li data-target="#concursoCarousel" data-slide-to="<?php echo $i; ?>" <?php if($i == 0): ?>class="active"<?php endif; ?>></li>
+                    <?php endfor; ?>
+                </ol>
                 <!-- Carousel items -->
                 <div class="carousel-inner"><?php
-                $i = 0;
-                foreach($concursos_tap_concursos as $concurso):
-                    $active = $i > 0 ? "" : "active";
-                    $image = $this->image_resize($concurso['path'], $width, $height);
-                    if($image instanceof WP_Error)
-                        $image = $concurso['path'];?>
+                    $i = 0;
+                    foreach($concursos_tap_concursos as $concurso):
+                        $active = $i > 0 ? "" : "active";
+                        $image = $this->image_resize($concurso['path'], $width, $height, false, null, $destination['path']);
+                        if($image instanceof WP_Error){
+                            $image = $concurso['path'];
+                        }else{
+                            $image = $destination['url'].'/'.wp_basename($image);
+                        }?>
                     <div class="<?php echo $active ?> item">
                         <a href="<?php echo esc_url($concurso['url']) ?>" title="<?php echo $concurso['concursos'];  ?>" target="_blank" rel="bookmark">
-                            <img src="<?php echo $image;?>" alt="<?php echo $concurso['concursos']; ?>" title="<?php echo $concurso['concursos']; ?>" class="img-responsive" style="width: <?php echo $width?>; height: <?php echo $height?>;">
+                            <img src="<?php echo $image;?>" alt="<?php echo $concurso['concursos']; ?>" title="<?php echo $concurso['concursos']; ?>" class="img-responsive center-block" style="width: <?php echo $width?>; height: <?php echo $height?>;">
                         </a>
-                    </div><?php
-                    $i++;
-                endforeach; ?>
+                        </div><?php
+                        $i++;
+                    endforeach; ?>
                 </div>
                 <!-- Carousel nav -->
-                <a class="carousel-control left" href="#concursoCarousel" data-slide="prev">&lsaquo;</a>
-                <a class="carousel-control right" href="#concursoCarousel" data-slide="next">&rsaquo;</a>
+<!--            <a class="carousel-control left" href="#concursoCarousel" data-slide="prev">&lsaquo;</a>-->
+<!--            <a class="carousel-control right" href="#concursoCarousel" data-slide="next">&rsaquo;</a>-->
             </div><?php
             else: ?>
             <p><?php _e('No hay concursos publicados', $this->plugin_slug)?></p><?php
