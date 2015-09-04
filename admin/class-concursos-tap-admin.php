@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name.
+ * Concursos TAP.
  *
  * @package   Concursos_TAP_Admin
  * @author    Alain Sanchez <luka.ghost@gmail.com>

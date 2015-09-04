@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name.
+ * Concursos TAP.
  *
  * @package   Concursos_TAP
  * @author    Alain Sanchez <luka.ghost@gmail.com>
@@ -29,7 +29,7 @@ class Concursos_TAP {
 	 *
 	 * @var     string
 	 */
-	const VERSION = '2.1.1.0';
+	const VERSION = '2.1.2';
 
 	/**
 	 *
